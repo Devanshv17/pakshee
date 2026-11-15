@@ -1,0 +1,587 @@
+/* ==========================================================================
+   Pakshee — Design System & Stylesheet
+   Theme: Atmospheric Deep Nocturne / Glassmorphism
+   ========================================================================== */
+
+:root {
+  --bg-dark: #07090e;
+  --bg-card: rgba(14, 18, 26, 0.75);
+  --bg-card-border: rgba(255, 255, 255, 0.08);
+  --text-main: #f0f4f8;
+  --text-muted: #8b9bb4;
+  --text-sub: #5c6b84;
+
+  /* NAQI Palette (India CPCB Standards) */
+  --aqi-good: #2ecc71;
+  --aqi-satisfactory: #a2d729;
+  --aqi-moderate: #f1c40f;
+  --aqi-poor: #e67e22;
+  --aqi-very-poor: #e74c3c;
+  --aqi-severe: #8e44ad;
+
+  /* Accents */
+  --accent-cyan: #00f2fe;
+  --accent-glow: rgba(0, 242, 254, 0.35);
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Outfit', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  height: 100vh;
+  width: 100vw;
+  user-select: none;
+}
+
+/* Glassmorphism Utility */
+.glass {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--bg-card-border);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Fullscreen Map Canvas */
+#map {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* ==========================================================================
+   Audio Activation Modal
+   ========================================================================== */
+.audio-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 6, 10, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+
+.audio-modal.dismissed {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  display: none !important;
+}
+
+.modal-card {
+  max-width: 520px;
+  padding: 44px 38px;
+  background: rgba(18, 22, 32, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+}
+
+.logo-badge {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  letter-spacing: 0.22em;
+  color: var(--accent-cyan);
+  background: rgba(0, 242, 254, 0.12);
+  border: 1px solid rgba(0, 242, 254, 0.3);
+  padding: 6px 14px;
+  border-radius: 50px;
+  margin-bottom: 20px;
+}
+
+.modal-card h1 {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 14px;
+  background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.modal-card .tagline {
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.headphone-notice {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 30px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px 16px;
+  border-radius: 50px;
+}
+
+.primary-audio-btn {
+  position: relative;
+  width: 100%;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+  color: #050b14;
+  border: none;
+  border-radius: 14px;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 0 30px var(--accent-glow);
+}
+
+.primary-audio-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 45px rgba(0, 242, 254, 0.6);
+}
+
+/* ==========================================================================
+   Header & Floating Navigation
+   ========================================================================== */
+.app-header {
+  position: fixed;
+  top: 16px;
+  left: 20px;
+  right: 20px;
+  height: 60px;
+  z-index: 100;
+  border-radius: 16px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.brand-name {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+}
+
+.brand-sub {
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+}
+
+.controls-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.layer-pill, .audio-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-main);
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.layer-pill:hover, .audio-pill:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.layer-pill.active {
+  background: rgba(231, 76, 60, 0.18);
+  border-color: rgba(231, 76, 60, 0.45);
+  color: #ff7675;
+}
+
+.pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #74b9ff;
+}
+
+.layer-pill.active .pill-dot {
+  background: #ff7675;
+  box-shadow: 0 0 10px #ff7675;
+}
+
+/* Sound Wave Animation */
+.sound-wave-icon {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+  width: 14px;
+}
+
+.sound-wave-icon .bar {
+  width: 3px;
+  background: var(--accent-cyan);
+  border-radius: 1px;
+}
+
+.audio-pill.active .bar-1 { animation: wave 0.8s ease-in-out infinite alternate; height: 12px; }
+.audio-pill.active .bar-2 { animation: wave 0.8s ease-in-out 0.2s infinite alternate; height: 6px; }
+.audio-pill.active .bar-3 { animation: wave 0.8s ease-in-out 0.4s infinite alternate; height: 10px; }
+
+@keyframes wave {
+  0% { height: 3px; }
+  100% { height: 14px; }
+}
+
+/* ==========================================================================
+   Scroll-Driven Story Chapters (Left Rail)
+   ========================================================================== */
+.story-rail {
+  position: relative;
+  z-index: 20;
+  width: 380px;
+  margin-top: 100px;
+  margin-left: 24px;
+  padding-bottom: 250px;
+  pointer-events: none;
+}
+
+.story-chapter {
+  pointer-events: auto;
+  margin-bottom: 350px;
+  padding: 28px;
+  border-radius: 20px;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.story-chapter.active {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 30px rgba(0, 242, 254, 0.2);
+}
+
+.step-num {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  color: var(--accent-cyan);
+  margin-bottom: 8px;
+}
+
+.story-chapter h2 {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  margin-bottom: 12px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.story-chapter p {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.story-chapter .hint {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--text-sub);
+}
+
+.listen-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  background: rgba(0, 242, 254, 0.12);
+  border: 1px solid rgba(0, 242, 254, 0.3);
+  color: var(--accent-cyan);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.84rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.listen-btn:hover {
+  background: var(--accent-cyan);
+  color: #050b14;
+}
+
+/* ==========================================================================
+   Realtime Station Detail Card (Bottom Right)
+   ========================================================================== */
+.station-card {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 360px;
+  z-index: 100;
+  padding: 24px;
+  border-radius: 20px;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s;
+}
+
+.station-card.hidden {
+  transform: translateY(40px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.card-city {
+  font-size: 0.75rem;
+  font-family: var(--font-display);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.close-btn:hover {
+  color: #ffffff;
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  margin-bottom: 16px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.metric-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.metric-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--text-sub);
+  margin-bottom: 4px;
+}
+
+.metric-val {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.metric-val span:first-child {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.metric-val .unit {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.aqi-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: #ffffff;
+  background: #f1c40f;
+}
+
+/* Sonic Texture Panel */
+.sonic-signature {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.signature-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.sonic-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: var(--text-sub);
+}
+
+.harmony-tag {
+  font-size: 0.78rem;
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
+.meter-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2ecc71, #f1c40f, #e74c3c);
+  transition: width 0.4s ease;
+}
+
+.timbre-desc {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.time-meta {
+  font-size: 0.72rem;
+  color: var(--text-sub);
+}
+
+.card-listen-btn {
+  background: var(--text-main);
+  color: #07090e;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.card-listen-btn:hover {
+  background: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   NAQI Legend (Bottom Left)
+   ========================================================================== */
+.naqi-legend {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 90;
+  padding: 16px 20px;
+  border-radius: 14px;
+}
+
+.legend-title {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--text-sub);
+  margin-bottom: 10px;
+}
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.legend-item .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* ==========================================================================
+   Responsive Adaptations
+   ========================================================================== */
+@media (max-width: 768px) {
+  .story-rail {
+    width: calc(100vw - 48px);
+    margin-left: 24px;
+  }
+  .station-card {
+    width: calc(100vw - 48px);
+    right: 24px;
+    bottom: 16px;
+  }
+  .naqi-legend {
+    display: none;
+  }
+}

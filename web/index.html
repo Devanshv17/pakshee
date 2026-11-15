@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pakshee — Sonified Air Quality Experience</title>
+  
+  <!-- MapLibre GL JS v4 -->
+  <link href="https://unpkg.com/maplibre-gl@4.1.2/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@4.1.2/dist/maplibre-gl.js"></script>
+
+  <!-- Tone.js for Web Audio Synthesis -->
+  <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
+
+  <!-- D3.js v7 for Color Interpolation & Scales -->
+  <script src="https://unpkg.com/d3@7.9.0/dist/d3.min.js"></script>
+
+  <!-- Google Fonts: Space Grotesk & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Local Styles -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Fullscreen Map Canvas -->
+  <div id="map"></div>
+
+  <!-- Audio Activation Splash / Modal -->
+  <div id="audio-modal" class="audio-modal">
+    <div class="modal-card">
+      <div class="logo-badge">PAKSHEE • पक्षी</div>
+      <h1>Hear How India Breathes</h1>
+      <p class="tagline">An interactive sonic cartography transforming air quality into soundscapes. Click stations to hear their atmospheric signatures or explore the silence in unmonitored zones.</p>
+      
+      <div class="headphone-notice">
+        <span class="icon">🎧</span> Best experienced with headphones
+      </div>
+
+      <button id="enable-audio-btn" class="primary-audio-btn" onclick="window.pakshee && window.pakshee.app && window.pakshee.app.dismissModal()">
+        <span class="pulse-ring"></span>
+        <span class="btn-text">Enter Soundscape</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Top Navigation & Layer Controls -->
+  <header class="app-header glass">
+    <div class="brand">
+      <span class="brand-name">pakshee</span>
+      <span class="brand-sub">air sonification</span>
+    </div>
+    
+    <div class="controls-group">
+      <div class="toggle-control">
+        <button id="toggle-bias-btn" class="layer-pill" title="Toggle Monitoring Bias / Silent Zones Layer">
+          <span class="pill-dot"></span>
+          <span class="pill-label">Bias & Silent Zones</span>
+        </button>
+      </div>
+
+      <div class="toggle-control">
+        <button id="audio-toggle-btn" class="audio-pill active">
+          <span class="sound-wave-icon">
+            <span class="bar bar-1"></span>
+            <span class="bar bar-2"></span>
+            <span class="bar bar-3"></span>
+          </span>
+          <span id="audio-status-label">Audio Active</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Scroll-Driven Story Narrative Rail (Left Overlay) -->
+  <div id="story-rail" class="story-rail">
+    <section class="story-chapter glass" data-step="0" data-center="[78.9629, 21.0000]" data-zoom="4.6">
+      <div class="step-num">01 / OVERVIEW</div>
+      <h2>The Subcontinent's Breath</h2>
+      <p>Across India, over 700 ambient monitoring stations capture particulates in real-time. Each station resonates at a unique pitch shaped by PM2.5 concentration.</p>
+      <div class="hint">Scroll down to travel through sonic regions, or click any glowing station on the map.</div>
+    </section>
+
+    <section class="story-chapter glass" data-step="1" data-center="[77.2090, 28.6139]" data-zoom="9.5">
+      <div class="step-num">02 / INDO-GANGETIC PLAIN</div>
+      <h2>Delhi & Northern Corridors</h2>
+      <p>Trapped by Himalayan geography and seasonal meteorology, winter particulates regularly exceed 250 µg/m³. Here, clean major triads decay into abrasive dissonant clusters and bitcrushed noise.</p>
+      <button class="listen-btn" onclick="window.pakshee.app.playCity('Delhi')">Listen to Delhi Stations</button>
+    </section>
+
+    <section class="story-chapter glass" data-step="2" data-center="[77.5946, 12.9716]" data-zoom="10">
+      <div class="step-num">03 / PENINSULAR PLATEAU</div>
+      <h2>Bengaluru Tech Corridor</h2>
+      <p>Bengaluru oscillates between moderate valley readings and roadside spikes at high-traffic junctions like Silk Board and Peenya Industrial Area.</p>
+      <button class="listen-btn" onclick="window.pakshee.app.playCity('Bengaluru')">Listen to Bengaluru</button>
+    </section>
+
+    <section class="story-chapter glass" data-step="3" data-center="[82.0000, 24.0000]" data-zoom="5.5" data-bias="true">
+      <div class="step-num">04 / THE SILENT ZONES</div>
+      <h2>The Unmonitored Millions</h2>
+      <p>Notice the vast swathes of high-density districts with zero official continuous monitors. In our sonification, these zones fall completely silent—a stark reminder that what isn't measured remains unheard.</p>
+      <button class="listen-btn" onclick="window.pakshee.app.toggleBiasLayer(true)">Highlight Silent Zones</button>
+    </section>
+  </div>
+
+  <!-- Realtime Station Detail Card (Bottom Right Glassmorphism) -->
+  <aside id="station-card" class="station-card glass hidden">
+    <div class="card-header">
+      <div id="card-city" class="card-city">BENGALURU</div>
+      <button id="card-close" class="close-btn">&times;</button>
+    </div>
+    <h3 id="card-name" class="card-title">Silk Board Junction</h3>
+    
+    <div class="metric-row">
+      <div class="metric-block">
+        <span class="metric-label">PM2.5 DENSITY</span>
+        <div class="metric-val">
+          <span id="card-pm25">78.5</span>
+          <span class="unit">µg/m³</span>
+        </div>
+      </div>
+      <div class="metric-block">
+        <span class="metric-label">NAQI CATEGORY</span>
+        <div id="card-aqi" class="aqi-badge">Moderate</div>
+      </div>
+    </div>
+
+    <!-- Live Sonic Character Panel -->
+    <div class="sonic-signature">
+      <div class="signature-header">
+        <span class="sonic-label">SONIC TEXTURE</span>
+        <span id="card-harmony" class="harmony-tag">Detuned Dissonance</span>
+      </div>
+      <div class="meter-bar">
+        <div id="card-meter" class="meter-fill" style="width: 60%;"></div>
+      </div>
+      <div id="card-timbre-desc" class="timbre-desc">
+        A subtle chorus detuning (+15 cents) with low-pass filter saturation and bird-like FM modulation.
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <span id="card-time" class="time-meta">Updated 2h ago • OpenAQ v3</span>
+      <button id="card-play-btn" class="card-listen-btn">
+        <span class="play-icon">▶</span> Replay Sound
+      </button>
+    </div>
+  </aside>
+
+  <!-- NAQI Legend (Bottom Left) -->
+  <div class="naqi-legend glass">
+    <div class="legend-title">NAQI (PM2.5 µg/m³)</div>
+    <div class="legend-items">
+      <div class="legend-item"><span class="dot" style="background: #2ecc71;"></span> Good (0-30)</div>
+      <div class="legend-item"><span class="dot" style="background: #a2d729;"></span> Satisfactory (31-60)</div>
+      <div class="legend-item"><span class="dot" style="background: #f1c40f;"></span> Moderate (61-90)</div>
+      <div class="legend-item"><span class="dot" style="background: #e67e22;"></span> Poor (91-120)</div>
+      <div class="legend-item"><span class="dot" style="background: #e74c3c;"></span> Very Poor (121-250)</div>
+      <div class="legend-item"><span class="dot" style="background: #8e44ad;"></span> Severe (250+)</div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/audio.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

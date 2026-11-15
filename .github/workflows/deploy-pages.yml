@@ -1,0 +1,55 @@
+name: Deploy Pakshee to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'web/**'
+      - 'data/processed/**'
+      - '.github/workflows/deploy-pages.yml'
+  workflow_run:
+    workflows: ["Refresh Air Quality & Bias Data"]
+    types:
+      - completed
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Build Static Distribution Directory
+        run: |
+          mkdir -p dist
+          # Copy web frontend files to root of site
+          cp -r web/* dist/
+          # Copy processed GeoJSON datasets
+          mkdir -p dist/data/processed
+          cp data/processed/*.geojson dist/data/processed/ 2>/dev/null || true
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

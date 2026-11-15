@@ -1,0 +1,11 @@
+{
+  "name": "pakshee-web",
+  "version": "0.1.0",
+  "description": "A sonified air quality experience for India",
+  "scripts": {
+    "dev": "npx serve . -p 3000",
+    "start": "npx serve . -p 3000"
+  },
+  "author": "Riya Kashive",
+  "license": "MIT"
+}
